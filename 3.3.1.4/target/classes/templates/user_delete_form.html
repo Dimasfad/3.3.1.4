@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <title>User Delete Form</title>
+</head>
+<body>
+<div class="form-group row justify-content-center align-items-center">
+<!--  <form th:action="@{/delete/{id}(id=${user.id})}"-->
+<!--        th:object="${user}" th:method="delete">-->
+  <form
+          id="user-delete-form"
+          th:data-user-id="${user.id}"
+          onsubmit="return false"
+          th:object="${user}"
+  >
+    <div class="form-group text-center">
+      <strong><label for="delId">ID</label></strong><br>
+      <input type="number" class="form-control"
+             th:value="${user.id}" id="delId" name="id" readonly>
+    </div>
+    <div class="form-group text-center">
+      <strong><label
+              for="delName">Name</label></strong><br>
+      <input type="text" class="form-control"
+             th:value="${user.name}" id="delName" name="name" readonly>
+    </div>
+    <div class="form-group text-center">
+      <strong><label
+              for="delSurname">Surname</label></strong><br>
+      <input type="text" class="form-control"
+             th:value="${user.surname}" id="delSurname" name="surname"
+             readonly>
+    </div>
+    <div class="form-group text-center">
+      <strong><label for="delAge">Age</label></strong><br>
+      <input type="text" class="form-control"
+             th:value="${user.age}" id="delAge" name="age" readonly>
+    </div>
+    <div class="form-group text-center">
+      <strong><label for="delRoles">Role</label></strong>
+      <select multiple class="form-control w-100" id="delRoles" name="roles"
+              readonly>
+        <option
+                th:each="role : ${user.roles}"
+                th:text="${role.getRole()}">
+        </option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary"
+              data-dismiss="modal">Close
+      </button>
+      <input type="submit" class="btn btn-danger"
+             value="Delete"/>
+    </div>
+  </form>
+</div>
+</body>
+<script>
+  $(document).ready(function(){
+    console.log("Registering delete edit form onsubmit callback!");
+    $("#user-delete-form").on('submit', function(e) {
+      let userId = e.currentTarget.getAttribute("data-user-id");
+      const formData = $("#user-delete-form").serialize();
+      console.log({userId, formData})
+      fetch(`/api/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded" // Important!
+        },
+        body: formData
+      })
+              .then(resp => {
+                console.log('Hiding the modal only after we received the response. Code: ',  resp.status)
+                return resp.text()
+              })
+              .then(data => {
+                console.log(data)
+                reloadUsersTable(); // Reload the users table!
+                $(`#modal-delete-${userId}`).modal('hide'); // Hide the modal manually!
+              })
+    })
+  })
+</script>
+</html>

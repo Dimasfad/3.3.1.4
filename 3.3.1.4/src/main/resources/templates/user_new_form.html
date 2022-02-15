@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New User Form</title>
+</head>
+<body>
+<div class="row">
+    <div class="col border bg-light"><p><h6>Add new user</h6></p></div>
+    <div class="w-100"></div>
+    <div class="col border bg-white text-center"><br>
+        <form
+                id="user-new-form"
+                onsubmit="return false"
+                th:object="${userr}"
+        >
+            <div class="form-group row justify-content-center align-items-center">
+                <div class="col-sm-3">
+                    <strong><label for="name">Name</label></strong><br>
+                    <input type="text" class="form-control" th:field="*{name}" id="name"
+                           placeholder="Name" required minlength="3" maxlength="20">
+                </div>
+            </div>
+            <div class="form-group row justify-content-center align-items-center">
+                <div class="col-sm-3">
+                    <strong><label for="surname">Surname</label></strong><br>
+                    <input type="text" class="form-control" th:field="*{surname}" id="surname"
+                           placeholder="Surname" required minlength="3" maxlength="30">
+                </div>
+            </div>
+            <div class="form-group row justify-content-center align-items-center">
+                <div class="col-sm-3">
+                    <strong><label for="age">Age</label></strong><br>
+                    <input type="number" class="form-control" th:field="*{age}" id="age"
+                           placeholder="Age" required min="1" max="99">
+                </div>
+            </div>
+            <div class="form-group row justify-content-center align-items-center">
+                <div class="col-sm-3">
+                    <strong><label for="pwd">Password</label></strong><br>
+                    <input type="password" class="form-control" th:field="*{password}" id="pwd"
+                           placeholder="Password" required>
+                </div>
+            </div>
+            <div class="form-group row justify-content-center align-items-center">
+                <div class="col-sm-3">
+                    <label for="roles">Role</label>
+                    <select multiple class="form-control w-100" id="roles" name="checked">
+                        <option
+                                th:each="role : ${roleList}"
+                                th:text="${role.getRole()}"
+                                th:value="${role.getId()}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success">
+                Add new user
+            </button>
+            <br><br>
+        </form>
+    </div>
+</div>
+</body>
+<script>
+    $(document).ready(function(){
+        console.log("Registering user new form onsubmit callback!");
+        $("#user-new-form").on('submit', function(e) {
+            const formData = $("#user-new-form").serialize();
+            console.log({formData})
+            fetch(`/api/users`, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: formData
+            })
+                .then(resp => {
+                    console.log('Hiding the modal only after we received the response. Code: ',  resp.status)
+                    return resp.json()
+                })
+                .then(data => {
+                    console.log(data)
+                    reloadUsersTable(); // Reload the users table!
+                    // window.location.href = '#users_table';
+                    $("#admin-tab li:first-child a").tab('show') // Select first tab
+                })
+        })
+    })
+</script>
+</html>

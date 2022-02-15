@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <title>Admin panel</title>
+</head>
+<body>
+<nav class="navbar bg-dark navbar-dark fixed-top">
+    <form class="form-inline">
+        <strong><span class="navbar-text text-white" th:text="${user.getName()}" ></span></strong>
+        <span class="navbar-text text-white">&nbspwith roles:&nbsp</span>
+        <span class="navbar-text text-white" th:each="roll: ${user.getRoles()}" th:text="${roll.role}+' '"></a> </span>
+    </form>
+    <ul class="navbar-nav float-lg-end">
+        <li class="nav-item">
+            <a class="nav-link text-muted" th:href="@{/logout}">Logout</a>
+        </li>
+    </ul>
+</nav>
+<div class="container-fluid bg-light">
+    <div class="row">
+        <div class="col-sm-2 bg-white min-vh-100">
+            <ul class="nav nav-pills flex-column"><br><br><br>
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/admin}">Admin</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/user}">User</a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-sm-10 bg-light"><br><br><br>
+            <p>
+            <h2>Admin panel</h2>
+            <ul id="admin-tab" class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#users_table">Users table</a>
+                </li>
+                <li class="nav-item">
+                    <a
+                            class="nav-link link-toggles-form-modal-for-new"
+                            data-toggle="tab"
+                            href="#add_user"
+
+                    >New User</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane container-fluid active" id="users_table">
+                    <div class="row">
+                        <div class="col border bg-light"><p><h6>All users</h6></p></div>
+                        <div class="w-100"></div>
+                        <div class="col border bg-white"><br>
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th> ID </th>
+                                    <th>   Name  </th>
+                                    <th>   Surname   </th>
+                                    <th>   Age  </th>
+                                    <th>   Role  </th>
+                                    <th>   Edit user   </th>
+                                    <th>   Delete user   </th>
+                                </tr>
+                                </thead>
+                                <tbody id="users-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane container-fluid fade" id="add_user">
+                    Tab content will be loaded dynamically
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.js"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.js"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.js"
+        crossorigin="anonymous"></script>
+</body>
+<script>
+    function registerModalDynamicLoading(formType) {
+        $(`.btn-toggles-form-modal-for-${formType}`).on('click', function(e){
+            const userId = e.target.getAttribute('data-user-id')
+            console.log(`Triggerred ${formType} modal form loading for UserID: `, userId)
+            let modalBodyElement = $(`#modal-body-${formType}-${userId}`);
+            console.log(modalBodyElement)
+            modalBodyElement.load(`/admin/form/${formType}/${userId}`, function(content){
+                console.log(`Loaded content for ${formType} modal for user: `, userId, content.length)
+            });
+        });
+    }
+
+    function registerModalDynamicLoadingNew() {
+        $('.link-toggles-form-modal-for-new').on('click', function(e){
+            $('#add_user').load('/admin/form/new', function(content) {
+                console.log(`Loaded content for NEW modal: `, content.length)
+            })
+        })
+    }
+
+    function reloadUsersTable() {
+        fetch("/api/users")
+            .then(response => response.json())
+            .then(users => {
+                console.log(users);
+                var tableBody = document.getElementById("users-table-body")
+                console.log("Clearing the table..")
+                tableBody.innerHTML = '';
+                users.forEach(user => {
+                    console.log(user);
+                    let row = document.createElement("tr");
+                    let fields = ['id', 'username', 'surname', 'age'];
+                    fields.forEach(field => {
+                        let col = document.createElement("td");
+                        col.textContent = user[field];
+                        row.appendChild(col);
+                    })
+                    console.log(user.roles)
+                    let joinedRoles = user.roles.map(role => role.role).join(",");
+                    let rolesCol = document.createElement("td");
+                    rolesCol.textContent = joinedRoles;
+                    row.appendChild(rolesCol);
+
+                    let editCol = document.createElement("td");
+                    editCol.innerHTML = `
+                    <button type="button" class="btn btn-info btn-toggles-form-modal-for-edit"
+                                            data-toggle="modal"
+                                            data-user-id="${user.id}"
+                                            data-target="#modal-edit-${user.id}"
+                                            data-backdrop="static" data-keyboard="false"
+                                    >
+                                        Edit
+                                    </button>
+                                    <div class="modal"
+                                         id="modal-edit-${user.id}"
+                                         data-backdrop="static"
+                                         data-keyboard="false"
+                                    >
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h6 class="modal-title">Edit user</h6>
+                                                    <button type="button" class="close" data-dismiss="modal">×
+                                                    </button>
+                                                </div>
+                                                <div id="modal-body-edit-${user.id}" class="modal-body">
+                                                    Modal body will be loaded dynamically
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                    `;
+                    row.appendChild(editCol);
+
+                    let deleteCol = document.createElement("td");
+                    deleteCol.innerHTML = `
+                        <button type="button" class="btn btn-danger btn-toggles-form-modal-for-delete"
+                                                data-toggle="modal"
+                                                data-user-id="${user.id}"
+                                                data-target="#modal-delete-${user.id}"
+
+                                        >
+                                            Delete
+                                        </button>
+                                        <div class="modal"
+                                             id="modal-delete-${user.id}"
+                                             data-backdrop="static"
+                                             data-keyboard="false"
+                                        >
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h6 class="modal-title">Delete user</h6>
+                                                        <button type="button" class="close" data-dismiss="modal">×
+                                                        </button>
+                                                    </div>
+                                                    <div id="${'modal-body-delete-'+user.id}" class="modal-body">
+                                                        Modal body will be loaded dynamically
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                    `;
+                    row.appendChild(deleteCol);
+
+                    tableBody.appendChild(row)
+                });
+
+                console.log('Registering modal callbacks..')
+                registerModalDynamicLoading("edit");
+                registerModalDynamicLoading("delete");
+                registerModalDynamicLoadingNew();
+            });
+    }
+
+    $(document).ready(function() {
+        reloadUsersTable();
+    });
+</script>
+
+</html>

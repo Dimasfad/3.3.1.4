@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <title>User Page</title>
+</head>
+<body>
+<nav class="navbar bg-dark navbar-dark fixed-top">
+  <form class="form-inline">
+    <strong><span class="navbar-text text-white" th:text="${user.getName()}" ></span></strong>
+    <span class="navbar-text text-white">&nbspwith roles:&nbsp</span>
+    <span class="navbar-text text-white"><a th:each="roll: ${user.getRoles()}" th:text="${roll.role}+' '"></a> </span>
+  </form>
+  <ul class="navbar-nav float-lg-end">
+    <li class="nav-item">
+      <a class="nav-link text-muted" th:href="@{/logout}">Logout</a>
+    </li>
+  </ul>
+</nav>
+<div class="container-fluid bg-light">
+  <div class="row">
+    <div class="col-sm-2 bg-white min-vh-100">
+      <ul class="nav nav-pills flex-column"><br><br><br>
+        <li class="nav-item" sec:authorize="hasAuthority('ADMIN')">
+          <a class="nav-link" th:href="@{/admin}">Admin</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" th:href="@{/user}">User</a>
+        </li>
+      </ul>
+    </div>
+    <div class="col-sm-10 bg-light"><br><br><br>
+      <p>
+      <h2>User information-page</h2>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col border bg-light"><p><h6>About User</h6></p></div>
+          <div class="w-100"></div>
+          <div class="col border bg-white"><br>
+            <table class="table table-hover">
+              <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Age</th>
+                <th>Role</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td th:text="${user.id}"></td>
+                <td th:text="${user.name}"></td>
+                <td th:text="${user.surname}"></td>
+                <td th:text="${user.age}"></td>
+                <td><a th:each="role : ${user.roles}" th:text="${role.role} + ' '"></a></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+</html>

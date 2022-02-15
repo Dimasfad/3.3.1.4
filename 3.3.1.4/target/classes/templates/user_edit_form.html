@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <title>User Edit Form</title>
+</head>
+<body>
+<!--th:action="@{/api/users/{id}(id=${user.id})}"-->
+<!--th:method="patch"-->
+<div class="form-group row justify-content-center align-items-center">
+    <form
+            id="user-edit-form"
+            th:data-user-id="${user.id}"
+            onsubmit="return false"
+            th:object="${user}"
+
+    >
+        <div class="form-group text-center">
+            <strong><label
+                    for="editId">ID</label></strong><br>
+            <input type="number" class="form-control"
+                   th:value="${user.id}" id="editId" name="id" readonly>
+        </div>
+        <div class="form-group text-center">
+            <strong><label
+                    for="editName">Name</label></strong><br>
+            <input type="text" class="form-control"
+                   th:value="${user.name}" id="editName" name="name"
+                   required minlength="3" maxlength="20">
+        </div>
+        <div class="form-group text-center">
+            <strong><label
+                    for="editSurname">Surname</label></strong><br>
+            <input type="text" class="form-control"
+                   th:value="${user.surname}" id="editSurname" name="Surname"
+                   required minlength="3" maxlength="30">
+        </div>
+        <div class="form-group text-center">
+            <strong><label
+                    for="editAge">Age</label></strong>
+            <input type="number" class="form-control"
+                   th:value="${user.age}" id="editAge" name="age"
+                   required min="1" max="99">
+        </div>
+        <div class="form-group text-center">
+            <strong><label
+                    for="editPassword">Password</label></strong>
+            <input type="password" class="form-control"
+                   th:value="null"
+                   id="editPassword" name="password">
+        </div>
+        <div class="form-group text-center">
+            <strong><label
+                    for="editRoles">Role</label></strong>
+            <select multiple class="form-control w-100"
+                    id="editRoles" name="checked">
+                <option
+                        th:each="role : ${roleList}"
+                        th:value="${role.getId()}"
+                        th:text="${role.getRole()}">
+                </option>
+            </select>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary"
+                    data-dismiss="modal"
+            >
+                Close
+            </button>
+<!--            <button-->
+<!--                    class="btn btn-info"-->
+<!--                    id="user-edit-submit-button"-->
+<!--            >-->
+<!--                Edit-->
+<!--            </button>-->
+            <input type="submit"
+                   class="btn btn-info"
+                   value="Edit"
+                   data-backdrop="static" data-keyboard="false"
+                   onsubmit=""
+            />
+        </div>
+    </form>
+</div>
+</body>
+<script>
+    $(document).ready(function(){
+        console.log("Registering user edit form onsubmit callback!");
+        $("#user-edit-form").on('submit', function(e) {
+            let userId = e.currentTarget.getAttribute("data-user-id");
+            const formData = $("#user-edit-form").serialize();
+            console.log({userId, formData})
+            // async function doFetch() {
+            //     let foo = await fetch(`/api/users/${userId}`, {
+            //         method: 'PATCH',
+            //         headers: {
+            //             "Content-Type": "application/x-www-form-urlencoded"
+            //         },
+            //         body: formData
+            //     })
+            //         // .then(resp => resp.json())
+            //         // .then(data =>
+            //         //     console.log(data)
+            //         // );
+            //     return foo
+            //
+            // }
+            fetch(`/api/users/${userId}`, {
+                method: 'PATCH',
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: formData
+            })
+            .then(resp => {
+                console.log('Hiding the modal only after we received the response. Code: ',  resp.status)
+                return resp.json()
+            })
+            .then(data => {
+                console.log(data)
+                reloadUsersTable(); // Reload the users table!
+                $(`#modal-edit-${userId}`).modal('hide');
+            })
+        })
+    })
+</script>
+</html>
